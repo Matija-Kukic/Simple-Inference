@@ -1,7 +1,7 @@
 import argparse
+import json
 import traceback
 
-import torch
 
 
 def main() -> None:
@@ -21,26 +21,38 @@ def reference_inference() -> None:
 
 
 def create_tokens() -> None:
-    from .ref_transformers.create_tokens import create_tokens, save_model_inputs
+
+    from .ref_transformers.create_tokens import (
+        create_tokens as tokenize_prompt,
+    )
+    from .ref_transformers.create_tokens import (
+        save_model_inputs,
+    )
 
     parser = argparse.ArgumentParser()
     parser.add_argument("prompt")
 
     args = parser.parse_args()
-    prompt = args.prompt
-    path = "./src/qwen_inference/data/input_ids.pt"
+
+    path = "./src/qwen_inference/data/input_ids.json"
 
     print("Creating tokens.")
+
     try:
-        model_inputs = create_tokens(prompt)
+        model_inputs = tokenize_prompt(args.prompt)
         save_model_inputs(model_inputs, path)
+
         print("Tokens saved successfully.")
 
-    except Exception as exc:
+        with open(path) as file:
+            data = json.load(file)
+
+        print("input_ids:")
+        print(data["input_ids"])
+
+        print("attention_mask:")
+        print(data["attention_mask"])
+
+    except Exception as exc:  # noqa: BLE001
         print(f"{type(exc).__name__}: {exc}")
         traceback.print_exc()
-
-    data = torch.load(path)
-
-    print(type(data))
-    print(data)

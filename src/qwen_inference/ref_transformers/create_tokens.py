@@ -1,3 +1,6 @@
+import json
+from pathlib import Path
+
 import torch
 from transformers import AutoTokenizer, BatchEncoding
 
@@ -10,7 +13,7 @@ def create_tokens(prompt: str) -> BatchEncoding:
     messages = [
         {
             "role": "user",
-            "content": "Give me a short introduction to large language models.",
+            "content": prompt,
         }
     ]
 
@@ -21,12 +24,10 @@ def create_tokens(prompt: str) -> BatchEncoding:
         enable_thinking=False,
     )
 
-    model_inputs = tokenizer(
+    return tokenizer(
         [text],
         return_tensors="pt",
     )
-
-    return model_inputs
 
 
 class ModelInputIOError(Exception):
@@ -35,13 +36,17 @@ class ModelInputIOError(Exception):
 
 def save_model_inputs(model_inputs: BatchEncoding, path: str) -> None:
     try:
-        tensors = {
-            key: value.cpu()
+        data = {
+            key: value.cpu().tolist()
             for key, value in model_inputs.items()
             if isinstance(value, torch.Tensor)
         }
 
-        torch.save(tensors, path)
+        output_path = Path(path)
+        output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    except (OSError, RuntimeError) as exc:
+        with output_path.open("w") as file:
+            json.dump(data, file, indent=2)
+
+    except (OSError, TypeError) as exc:
         raise ModelInputIOError(f"Failed to save model inputs to {path}") from exc
