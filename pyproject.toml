@@ -5,13 +5,22 @@ description = "Simple qwen3 inference in cuda."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "accelerate>=1.15.0",
     "torch>=2.13.0",
+    "transformers>=5.17.0",
 ]
 
 [project.scripts]
 inference = "inference_py:main"
 inference-test = "inference_py:test"
+hf-ref = "inference_py:reference_inference"
+ctokens = "inference_py:create_tokens"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"
+pythonVersion = "3.14"
