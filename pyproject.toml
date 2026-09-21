@@ -1,5 +1,5 @@
 [project]
-name = "inference_py"
+name = "qwen_inference"
 version = "0.1.0"
 description = "Simple qwen3 inference in cuda."
 readme = "README.md"
@@ -11,10 +11,10 @@ dependencies = [
 ]
 
 [project.scripts]
-inference = "inference_py:main"
-inference-test = "inference_py:test"
-hf-ref = "inference_py:reference_inference"
-ctokens = "inference_py:create_tokens"
+inference = "qwen_inference:main"
+inference-test = "qwen_inference:test"
+hf-ref = "qwen_inference:reference_inference"
+ctokens = "qwen_inference:create_tokens"
 
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]
