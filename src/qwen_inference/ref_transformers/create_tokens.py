@@ -1,11 +1,15 @@
+import argparse
 import json
+import traceback
 from pathlib import Path
 
 import torch
 from transformers import AutoTokenizer, BatchEncoding
 
+from qwen_inference.config import DATA_DIR
 
-def create_tokens(prompt: str) -> BatchEncoding:
+
+def tokenize_prompt(prompt: str) -> BatchEncoding:
     model_name = "Qwen/Qwen3-4B"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -34,7 +38,7 @@ class ModelInputIOError(Exception):
     pass
 
 
-def save_model_inputs(model_inputs: BatchEncoding, path: str) -> None:
+def save_model_inputs(model_inputs: BatchEncoding, path: Path) -> None:
     try:
         data = {
             key: value.cpu().tolist()
@@ -50,3 +54,34 @@ def save_model_inputs(model_inputs: BatchEncoding, path: str) -> None:
 
     except (OSError, TypeError) as exc:
         raise ModelInputIOError(f"Failed to save model inputs to {path}") from exc
+
+
+def create_tokens() -> None:
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("prompt")
+
+    args = parser.parse_args()
+
+    path = DATA_DIR / "input_ids.json"
+
+    print("Creating tokens.")
+
+    try:
+        model_inputs = tokenize_prompt(args.prompt)
+        save_model_inputs(model_inputs, path)
+
+        print("Tokens saved successfully.")
+
+        with open(path) as file:
+            data = json.load(file)
+
+        print("input_ids:")
+        print(data["input_ids"])
+
+        print("attention_mask:")
+        print(data["attention_mask"])
+
+    except Exception as exc:  # noqa: BLE001
+        print(f"{type(exc).__name__}: {exc}")
+        traceback.print_exc()

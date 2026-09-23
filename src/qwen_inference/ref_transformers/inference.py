@@ -2,7 +2,7 @@ import torch
 from transformers import AutoTokenizer, Qwen3ForCausalLM
 
 
-def inference() -> list[int]:
+def inference_full() -> list[int]:
     model_name = "Qwen/Qwen3-4B"
 
     tokenizer = AutoTokenizer.from_pretrained(model_name)
